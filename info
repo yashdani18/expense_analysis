@@ -1,0 +1,30 @@
+For 1 user
+
+Login screen with password
+(final page - with complete onboarding (including emails and forgot password))
+
+get splitwise api access (for >1 user)
+
+if database not found:
+    create database
+fetch database content
+fetch last record inserted into database
+fetch records from that point to present day from splitwise
+
+Once all records are fetched:
+    create listview in frontend
+    show first element of list and labels below them
+        default labels: groceries, fruits, vegetables, eating out, misc, drinks
+    Select one label:
+        P1. add current item to database (tentative/keep object in memory, commit all together)
+        remove current item from list
+        scroll list to next item
+        repeat until list is empty
+    once all items are processed, show a table view as a confirmation window
+        can present statistics and other observations before committing to db
+
+    extra functionalities
+        P1. if wrong label selected and progressed, undo functionality, modify object in dictionary in memory
+        create additional labels:
+            persist new labels to db
+            show newly added labels for every list item

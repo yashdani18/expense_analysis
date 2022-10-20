@@ -1,0 +1,27 @@
+CATEGORY = 'category'
+CATEGORY_NAME = 'name'
+COST = 'cost'
+CREATED_AT = 'created_at'
+CREATED_BY = 'created_by'
+CREATED_BY_NAME = 'first_name'
+CREATED_BY_ID = 'id'
+DESC = 'description'
+GROUP_ID = 'group_id'
+ID = 'id'
+REPAYMENTS = 'repayments'
+REPAYMENTS_AMOUNT = 'amount'
+REPAYMENTS_FROM = 'from'
+REPAYMENTS_TO = 'to'
+YASH_ID = 32703372
+MEET_ID = 43357520
+SWAPNIL_ID = 46379417
+GEET_ID = 27555627
+AKSHAY_ID = 41535264
+USERS = 'users'
+USER = 'user'
+USER_FIRST_NAME = 'first_name'
+USER_ID = 'id'
+USER_NET_BALANCE = 'net_balance'
+USER_OWED_SHARE = 'owed_share'
+USER_PAID_SHARE = 'paid_share'
+
