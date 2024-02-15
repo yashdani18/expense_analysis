@@ -2,10 +2,4 @@ config
 
 constants
 
-authtrial.py
-
-info
-
-response
-
-response_format
+misc
