@@ -1,5 +1,3 @@
-config
-
-constants
-
-misc
+/config
+/constants
+/misc
