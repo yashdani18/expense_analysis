@@ -1,23 +1,25 @@
 import json
-import pandas as pd
 import requests
 import time
 from config.keys import API_KEY
 from constants.constants import ID, GROUP_ID, \
     DESC, COST, CURRENCY_CODE, \
-    CATEGORY, CREATED_AT, CREATED_BY, UPDATED_AT, CREATED_BY_ID, CREATED_BY_NAME, CATEGORY_NAME, \
+    CATEGORY, CREATED_AT, CREATED_BY, UPDATED_AT, CATEGORY_NAME, \
+    UPDATED_BY, \
+    DELETED_BY, DELETED_AT, \
     USER_OWED_SHARE, \
     ARR_MONTHS, DECEMBER, \
-    UTF8, NUM_MONTHS, TIME_SLEEP, ID_YASH, LIMIT, USERS, EXPENSES
+    NUM_MONTHS, TIME_SLEEP, LIMIT, USERS, EXPENSES, EXPENSE_ID, \
+    REPAYMENTS, USER_ID
 
 from helper.splitwise import get_expenses_url, get_data_from_splitwise
 
 
 def extract():
+    total = 0
     years = [2022, 2023]
     for year in years:
         lastMonth = False
-        path = 'data/' + str(year) + '.csv'
         for month in range(1, NUM_MONTHS + 1, 1):
             start_date = f'{year}{str(month).zfill(2)}01'
             if month == 12:
@@ -27,34 +29,47 @@ def extract():
             else:
                 month += 1
             end_date = f'{year}{str(month).zfill(2)}01'
-            print(start_date, end_date)
             url = get_expenses_url(LIMIT, start_date, end_date)
             response = get_data_from_splitwise(url)
-            df = pd.DataFrame(columns=[ID, GROUP_ID, DESC, COST, CURRENCY_CODE,
-                                       CATEGORY, CREATED_BY_ID, CREATED_BY_NAME, CREATED_AT, UPDATED_AT])
             expenses = json.loads(response)[EXPENSES]
+            arr_expenses = []
             for expense in expenses:
+
+                if expense[ID] == 1532519262 or expense[DESC] == 'Payment' or expense[DESC] == 'Settle all balances':
+                    continue
+
+                #
                 users = expense[USERS]
                 for user in users:
-                    if user['user']['id'] == ID_YASH and user[USER_OWED_SHARE] > 0:
-                        new_row = {
-                            ID: expense[ID],
-                            GROUP_ID: expense[GROUP_ID],
-                            DESC: expense[DESC],
-                            COST: user[USER_OWED_SHARE],
-                            CURRENCY_CODE: expense[CURRENCY_CODE],
-                            CATEGORY: expense[CATEGORY][CATEGORY_NAME],
-                            CREATED_BY_ID: expense[CREATED_BY][CREATED_BY_ID],
-                            CREATED_BY_NAME: expense[CREATED_BY][CREATED_BY_NAME],
-                            CREATED_AT: expense[CREATED_AT],
-                            UPDATED_AT: expense[UPDATED_AT]}
-                        df.loc[len(df)] = new_row
+                    if user[USER_ID] == 32703372 and expense[DELETED_AT] is None:
+                        total += float(user[USER_OWED_SHARE])
+                #
 
-            # df.to_excel(writer, sheet_name=(
-            #     ARR_MONTHS[month - 1] + str(year) if lastMonth is False else (DECEMBER + str(year - 1))), encoding=UTF8)
-            df.to_csv('data/' + (ARR_MONTHS[month - 1] + str(year) + '.csv') if lastMonth is False
-                      else 'data/' + (DECEMBER + str(year - 1) + '.csv'),
-                      encoding=UTF8)
-            # df.to_excel('records/' + ARR_MONTHS[month - 1] + str(year) + ".csv", sep='\t', encoding='utf-8')
+                new_row = {
+                    EXPENSE_ID: expense[ID],
+                    GROUP_ID: expense[GROUP_ID] if expense[GROUP_ID] is not None else 0,
+                    DESC: expense[DESC],
+                    COST: expense[COST],
+                    CURRENCY_CODE: expense[CURRENCY_CODE],
+                    CATEGORY: expense[CATEGORY][CATEGORY_NAME],
+                    CREATED_BY: expense[CREATED_BY][ID],
+                    CREATED_AT: expense[CREATED_AT],
+                    UPDATED_BY: expense[UPDATED_BY][ID] if expense[UPDATED_BY] is not None else 0,
+                    UPDATED_AT: expense[UPDATED_AT],
+                    DELETED_BY: expense[DELETED_BY][ID] if expense[DELETED_BY] is not None else 0,
+                    DELETED_AT: expense[DELETED_AT],
+                    REPAYMENTS: expense[REPAYMENTS],
+                    USERS: expense[USERS]
+                }
+                arr_expenses.append(new_row)
+            filename = f'data/json/raw_{ARR_MONTHS[month - 1]}_{str(year)}.json' if lastMonth is False \
+                else f'data/json/raw_{DECEMBER}_{str(year - 1)}.json'
+            print('Writing to', filename, '...')
+            with open(filename, "w") as f:
+                json.dump(arr_expenses, f)
             time.sleep(TIME_SLEEP)
         # df
+    print(total)
+
+
+extract()

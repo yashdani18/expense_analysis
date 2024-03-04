@@ -1,7 +1,10 @@
+import json
+
 import requests
 
+import constants.constants
 from config.keys import API_KEY
-from constants.constants import URL_ROOT, ENDPOINT_EXPENSES
+from constants.constants import URL_ROOT, ENDPOINT_EXPENSES, USERS
 
 
 def get_url(endpoint):
@@ -22,7 +25,6 @@ def get_data_from_splitwise(p_url):
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Accept-Language": "en-US,en;q=0.5",
         "Accept-Encoding": "gzip, deflate"}).text
-
     return response
 
 
@@ -32,4 +34,64 @@ def get_current_user():
     return response
 
 
-get_current_user()
+def get_user(user_id):
+    url = get_url(f'get_user/{user_id}')
+    response = get_data_from_splitwise(url)
+    return response
+
+
+def get_group(group_id):
+    url = get_url(f'get_group/{group_id}')
+    response = get_data_from_splitwise(url)
+    return response
+
+
+def get_groups():
+    url = get_url('get_groups')
+    response = get_data_from_splitwise(url)
+    return response
+
+
+def get_categories():
+    url = get_url('get_categories')
+    response = get_data_from_splitwise(url)
+    return response
+
+
+def get_expenses_jan_2023():
+    url = get_expenses_url(1000, 20230101, 20230201)
+    response = get_data_from_splitwise(url)
+    expenses = json.loads(response)['expenses']
+
+    cost = 0
+
+    for expense in expenses:
+        users = expense[USERS]
+        for user in users:
+            if user[constants.constants.USER_ID] == constants.constants.ID_YASH and \
+                    expense[constants.constants.DELETED_AT] is None:
+                cost += float(user[constants.constants.USER_OWED_SHARE])
+
+    print(cost)
+
+
+def get_expense(expense_id):
+    url = get_url(f'get_expense/{expense_id}')
+    response = get_data_from_splitwise(url)
+    return response
+
+
+# get_current_user()
+
+# print(get_groups())
+
+if __name__ == "__main__":
+    # print(get_categories())
+
+    # print(get_user('46379417'))
+
+    # print(get_group(23291838))
+
+    # get_expenses_jan_2023()
+
+    print(get_expense(1532519262))
